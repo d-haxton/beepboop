@@ -8,3 +8,5 @@ Simple script with aimbot and 360.
 ESP on by default.
 
 "Anti-cheat" bypass.
+
+Discord: https://discord.gg/D75kRN9
