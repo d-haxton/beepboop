@@ -2,7 +2,7 @@
 // @name         BEEP BOOP MOTHERFUCKER
 // @author       d-haxton
 // @version      4.3
-// @match        *://krunker.io/*
+// @include      /^(https?:\/\/)?(www\.)?(.+)krunker\.io(|\/|\/\?(server|party)=.+)$/
 // @grant        GM_xmlhttpRequest
 // @run-at       document-start
 // ==/UserScript==
