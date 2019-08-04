@@ -2,7 +2,7 @@
 // @name         BEEP BOOP MOTHERFUCKER
 // @author       d-haxton
 // @version      4.3
-// @include      /^(https?:\/\/)?(www\.)?(.+)krunker\.io(|\/|\/\?(server|party)=.+)$/
+// @include      /^(https?:\/\/)?(www\.)?(.+)krunker\.io(|\/|\/\?(server|party|game)=.+)$/
 // @grant        GM_xmlhttpRequest
 // @run-at       document-start
 // ==/UserScript==
@@ -66,7 +66,7 @@ class Aimbot extends Module {
         return '' + keys.one + '';
     }
     getAllModes() {
-        return ["Off", "On", "360"];
+        return ["Off", "On", "360", "RMB", "RMB360"];
     }
     onTick() {
         if (!this.players) {
@@ -92,6 +92,12 @@ class Aimbot extends Module {
                 case "360":
                     isLockedOn = this.runQuickscoper(target, 3);
                     break;
+                case "RMB":
+                    isLockedOn = this.runRMB(target, 0);
+                    break;
+                case "RMB360":
+                    isLockedOn = this.runRMB(target, 3);
+                    break;
             }
         }
         else
@@ -107,6 +113,36 @@ class Aimbot extends Module {
             } 
         }
     }
+
+    runRMB(target, ticks) { 
+        if (this.control.mouseDownR === 0) {
+            return false;
+        }
+
+        if(ticks > 0)
+        {
+            this.spinTicks = this.spinTicks + 1;
+            unsafeWindow.control.object.rotation.y -= 4;
+            unsafeWindow.control.yDr -= 4;
+
+            unsafeWindow.control.xDr -= 4;
+            unsafeWindow.control.xVel -= 6.2;
+        }
+        
+        if (this.spinTicks < ticks || this.me.recoilForce > 0.01)
+        {
+            return false;
+        }
+
+        if (this.me.aimVal < 0.1) {
+            this.lookAt(target);
+            this.control.mouseDownL = 1 - this.control.mouseDownL;
+            this.spinTicks = 0;
+        }
+
+        return true;
+    }
+
     runQuickscoper(target, ticks) {
         if (this.me.didShoot) {
             this.canShoot = false;
@@ -151,6 +187,7 @@ class Aimbot extends Module {
             this.control.mouseDownL = 1 - this.control.mouseDownL;
             this.spinTicks = 0;
         }
+
         return true;
     }
 
