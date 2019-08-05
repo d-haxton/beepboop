@@ -74,7 +74,6 @@ class LagBot extends Module {
             unsafeWindow.lag = false;
         }
     }
-
 }
 
 class Aimbot extends Module {
@@ -512,10 +511,10 @@ function patchForAimbot(script) {
 }
 
 function patchForWallHack(script) {
-    var colorScript = applyPatch(script, 'patchForColorWallHack', /"#eb5656",/, `(tmpObj.inView ? "#eb5656" : "#ebe956"),`)
+    var colorScript = applyPatch(script, 'patchForColorWallHack', /"#eb5656",/, `(tmpObj.inView ? "#eb5656" : "#8b0000"),`)
     return applyPatch(colorScript, 'patchForWallHack', /\(!tmpObj.inView\)/, `(false)`);
 }
-  
+
 function patchOnTick(script) {
     return applyPatch(script, 'patchOnTick', /,([a-zA-Z0-9]+)\.procInputs\(([a-zA-Z0-9_]+)/, ($0, $1, $2) => {
         return `, window.${getRandomizedName('onTick')}(${$1}, ${$2}), ${$1}.procInputs(${$2}`;
