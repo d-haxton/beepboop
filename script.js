@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BEEP BOOP MOTHERFUCKER
 // @author       d-haxton
-// @version      4.3
+// @version      10.0
 // @include      /^(https?:\/\/)?(www\.)?(.+)krunker\.io(|\/|\/\?(server|party|game)=.+)$/
 // @grant        GM_xmlhttpRequest
 // @run-at       document-start
@@ -108,9 +108,10 @@ class Aimbot extends Module {
             this.control.camLookAt(null);
             this.control.target = null;
             if (this.getCurrentMode() === "On" || this.getCurrentMode() == "360") {
-                this.control.mouseDownL = 0;
                 this.control.mouseDownR = 0;
-            } 
+            }
+
+            this.control.mouseDownL = 0;
         }
     }
 
@@ -134,7 +135,7 @@ class Aimbot extends Module {
             return false;
         }
 
-        if (this.me.aimVal < 0.1) {
+        if (this.me.aimVal < 0.1 && this.control.mouseDownR === 1) {
             this.lookAt(target);
             this.control.mouseDownL = 1 - this.control.mouseDownL;
             this.spinTicks = 0;
