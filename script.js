@@ -52,6 +52,31 @@ class Module {
     }
 }
 
+class LagBot extends Module { 
+    constructor() { 
+        super(...arguments);
+        this.inLag = false;
+    }
+
+    getName() { return '[EXPERIMENTAL] LagBot'; };
+    getKey() { return '' + keys.three; }
+    getAllModes() { return ["Off", "On"]; }
+    onTick() { 
+        if(this.getCurrentMode() === "On")
+        {
+            unsafeWindow.lag = true;
+            setTimeout(() => {
+                unsafeWindow.lag = false;
+            }, 5000);
+        }
+        else
+        {
+            unsafeWindow.lag = false;
+        }
+    }
+
+}
+
 class Aimbot extends Module {
     constructor() {
         super(...arguments);
@@ -85,6 +110,7 @@ class Aimbot extends Module {
         let isLockedOn = false;
         if (possibleTargets.length > 0) {
             const target = possibleTargets[0];
+            unsafeWindow.lag = false;
             switch (this.getCurrentMode()) {
                 case "On":
                     isLockedOn = this.runQuickscoper(target, 0);
@@ -328,6 +354,7 @@ class bigdickjesusland {
         this.modules.push(new AutoReload());
         this.modules.push(new AimWalls());
         this.modules.push(new AutoBHop());
+        this.modules.push(new LagBot());
         const initInfoBoxInterval = setInterval(() => {
             if (this.canInjectInfoBox()) {
                 clearInterval(initInfoBoxInterval);
@@ -500,7 +527,37 @@ function patchIsHacker(script) {
     x = applyPatch(x, 'patchLastHack1', /&&([a-zA-Z0-9_]+)\.lastHack&&/, `&& 1 === 0 &&`);
     x = applyPatch(x, 'patchLastHack2', /var n=r.([a-zA-Z0-9]+)\(\[t,e\],this.ahNum\);this.([a-zA-Z0-9]+).send\(n\)/, ($0, $1, $2) => 
     {
-        return `var n=r.${$1}([t,e],this.ahNum);if(t!=="loadin")this.${$2}.send(n);else{this.${$2}.send(r.${$1}(["checkin",e],this.ahNum));}`;
+        return `var n=r.${$1}([t,e],this.ahNum);
+        if(t!=="loadin")
+        {
+            if(window.lagItems === undefined)
+            {
+                window.lagItems = [];
+            }
+
+            if(window.lag === true)
+            {
+                window.lagItems.push(n); 
+            }
+            else 
+            { 
+                while(window.lagItems.length !== 0)
+                {
+                    this.${$2}.send(window.lagItems.shift());
+                }
+
+                this.${$2}.send(n);
+            }
+        }
+        else
+        {
+            while(window.lagItems.length !== 0)
+            {
+                this.${$2}.send(window.lagItems.shift());
+            }
+
+            this.${$2}.send(r.${$1}(["checkin",e],this.ahNum));
+        }`;
     });
     return applyPatch(x, 'patchIsHacker', /window.kiH\(M\)/, ``);
 }
