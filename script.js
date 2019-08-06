@@ -527,42 +527,56 @@ function patchIsHacker(script) {
     x = applyPatch(x, 'patchLastHack2', /var n=r.([a-zA-Z0-9]+)\(\[t,e\],this.ahNum\);this.([a-zA-Z0-9]+).send\(n\)/, ($0, $1, $2) => 
     {
         return `var n=r.${$1}([t,e],this.ahNum);
-        if(t!=="loadin")
+        if(!(t === "i" || t === "p"))
         {
-            if(window.lagItems === undefined)
-            {
-                window.lagItems = [];
-            }
-
-            if(window.lag === true)
-            {
-                window.lagItems.push(n); 
-            }
-            else 
-            { 
-                while(window.lagItems.length !== 0)
-                {
-                    this.${$2}.send(window.lagItems.shift());
-                }
-
-                this.${$2}.send(n);
-            }
+            console.log(t); 
+        }
+        if(t === "hc")
+        {
+            return;
+        }
+        else if(t!=="loadin")
+        {
+            this.${$2}.send(n);
         }
         else
         {
-            while(window.lagItems.length !== 0)
+            if(window.hasLoaded)
             {
-                this.${$2}.send(window.lagItems.shift());
+                this.${$2}.send(r.${$1}(["check",e],this.ahNum));
             }
-
-            this.${$2}.send(r.${$1}(["checkin",e],this.ahNum));
+            else
+            {
+                this.${$2}.send(r.${$1}(["load",e],this.ahNum));
+                window.hasLoaded = true;
+            }
         }`;
     });
+    x = applyPatch(x, 'patchHack3', /.readyState!==WebSocket.OPEN/, `.readyState!==WebSocket.OPEN||t==="hc"`);
     return applyPatch(x, 'patchIsHacker', /window.kiH\(M\)/, ``);
 }
 
 function patchCamera(script) {
-    return applyPatch(script, 'patchCamera', /t.camera.rotation.set\(0,0,0\),/, `window.${getRandomizedName('camera')} = t.camera,t.camera.rotation.set(0,0,0),`)
+    return applyPatch(script, 'patchCamera', /t.camera.rotation.set\(0,0,0\),/, `window.${getRandomizedName('camera')} = t.camera,t.camera.rotation.set(0,0,0),`);
+}
+
+function patchAnticheat(script) { 
+    return applyPatch(script, 'patchAnticheat', /const ft=eval;/,`
+    const ft = function(fn) {
+        console.log(fn);
+        {
+            if (fn !== \`document.querySelector("script[src*='js/game']")?'load':'loadin'\`) {
+                window.alert("POST THIS IN DISCORD " + fn);
+                return;
+            }
+            else
+            {
+                window.hasLoaded = false;
+                return eval.apply(this, [\`document.querySelector("script[src*='js/game']")?'load':'load'\`]);
+            }
+        }
+    };
+    `);
 }
 
 function patchGameScript(script) {
@@ -575,6 +589,7 @@ function patchGameScript(script) {
     script = patchForWallHack(script);
     script = patchIsHacker(script);
     script = patchCamera(script);
+    script = patchAnticheat(script);
     logger.log('Successfully patched the game script!');
     return script;
 }
