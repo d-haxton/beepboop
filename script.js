@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BEEP BOOP MOTHERFUCKER
 // @author       d-haxton
-// @version      10.5
+// @version      10.5.1
 // @include      /^(https?:\/\/)?(www\.)?(.+)krunker\.io(|\/|\/\?(server|party|game)=.+)$/
 // @grant        GM_xmlhttpRequest
 // @run-at       document-start
@@ -570,7 +570,7 @@ function patchOnTick(script) {
 }
 
 function patchRespawn(script) { 
-    return applyPatch(script, 'patchRespawn', /i.deathDelay/, `0`)
+    return applyPatch(script, 'patchRespawn', /i.deathDelay/, `window.noSpawnTimer?0:i.deathDelay`)
 }
 
 function patchIsHacker(script) {
