@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BEEP BOOP MOTHERFUCKER
 // @author       d-haxton
-// @version      10.4
+// @version      10.5
 // @include      /^(https?:\/\/)?(www\.)?(.+)krunker\.io(|\/|\/\?(server|party|game)=.+)$/
 // @grant        GM_xmlhttpRequest
 // @run-at       document-start
