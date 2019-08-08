@@ -55,12 +55,12 @@ class Module {
 class SkinHack extends Module { 
     constructor() { 
         super(...arguments);
-        unsafeWindow.h4xskins = false;
+        unsafeWindow.h4xskins = true;
     }
 
     getName() { return 'All Skins'; };
     getKey() { return '' + keys.nine; }
-    getAllModes() { return ["Off", "On"]; }
+    getAllModes() { return ["On", "Off"]; }
     onTick() { 
         unsafeWindow.h4xskins = this.getCurrentMode() === "On";
     }
