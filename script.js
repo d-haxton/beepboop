@@ -570,7 +570,13 @@ function patchOnTick(script) {
 }
 
 function patchRespawn(script) { 
-    return applyPatch(script, 'patchRespawn', /i.deathDelay/, `window.noSpawnTimer?0:i.deathDelay`)
+    return applyPatch(script, 'patchRespawn', /i.deathDelay/, `window.noSpawnTimer?0:i.deathDelay`);
+}
+
+function patchBadHack(script) { 
+    // srsly guys, if you want me to make you a real anti-chat I'll do it for a few thousand, come find me on discord
+    // this shit is just sad and bad
+    return applyPatch(script, 'patchBadHack', /r.menu2="[a-zA-Z0-9]+"/, `r.menu2="BADBOY"`);
 }
 
 function patchIsHacker(script) {
@@ -579,33 +585,31 @@ function patchIsHacker(script) {
     x = applyPatch(x, 'patchLastHack1', /&&([a-zA-Z0-9_]+)\.lastHack&&/, `&& 1 === 0 &&`);
     x = applyPatch(x, 'patchLastHack2', /var n=r.([a-zA-Z0-9]+)\(\[t,e\],this.ahNum\);this.([a-zA-Z0-9]+).send\(n\)/, ($0, $1, $2) => 
     {
-        return `var n=r.${$1}([t,e],this.ahNum);
+        return `
         if(!(t === "i" || t === "p"))
         {
             console.log(t); 
         }
-        if(t === "hc")
+        
+        if(t!=="loadgg")
         {
-            return;
-        }
-        else if(t!=="loadin")
-        {
+            var n=r.${$1}([t,e],this.ahNum);
             this.${$2}.send(n);
         }
         else
         {
-            if(window.hasLoaded)
+            if(window.hasLoaded1)
             {
-                this.${$2}.send(r.${$1}(["check",e],this.ahNum));
+                this.${$2}.send(r.${$1}(["checkgg",e],this.ahNum));
             }
             else
             {
                 this.${$2}.send(r.${$1}(["load",e],this.ahNum));
-                window.hasLoaded = true;
+                window.hasLoaded1 = true;
             }
         }`;
     });
-    x = applyPatch(x, 'patchHack3', /.readyState!==WebSocket.OPEN/, `.readyState!==WebSocket.OPEN||t==="hc"`);
+    x = applyPatch(x, 'patchHack3', /.readyState!==WebSocket.OPEN/, `.readyState!==WebSocket.OPEN||t==="BADBOY"`);
     return applyPatch(x, 'patchIsHacker', /window.kiH\(M\)/, ``);
 }
 
@@ -614,18 +618,18 @@ function patchCamera(script) {
 }
 
 function patchAnticheat(script) { 
-    return applyPatch(script, 'patchAnticheat', /const ft=eval;/,`
-    const ft = function(fn) {
+    return applyPatch(script, 'patchAnticheat', /=eval;/,`
+    = function(fn) {
         console.log(fn);
         {
-            if (fn !== \`document.querySelector("script[src*='js/game']")?'load':'loadin'\`) {
+            if (fn !== \`document.querySelector("script[src*='js/game']")?'load':'loadgg'\`) {
                 window.alert("POST THIS IN DISCORD " + fn);
                 return;
             }
             else
             {
-                window.hasLoaded = false;
-                return eval.apply(this, [\`document.querySelector("script[src*='js/game']")?'load':'load'\`]);
+                window.hasLoaded1 = false;
+                return eval(fn);
             }
         }
     };
@@ -654,6 +658,7 @@ function patchGameScript(script) {
     script = patchAnticheat(script);
     script = patchSkins(script);
     script = patchRespawn(script);
+    script = patchBadHack(script);
     logger.log('Successfully patched the game script!');
     return script;
 }
