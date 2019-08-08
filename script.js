@@ -52,6 +52,20 @@ class Module {
     }
 }
 
+class SkinHack extends Module { 
+    constructor() { 
+        super(...arguments);
+        unsafeWindow.h4xskins = false;
+    }
+
+    getName() { return 'All Skins'; };
+    getKey() { return '' + keys.nine; }
+    getAllModes() { return ["Off", "On"]; }
+    onTick() { 
+        unsafeWindow.h4xskins = this.getCurrentMode() === "On";
+    }
+}
+
 class LagBot extends Module { 
     constructor() { 
         super(...arguments);
@@ -354,6 +368,7 @@ class bigdickjesusland {
         this.modules.push(new AimWalls());
         this.modules.push(new AutoBHop());
         this.modules.push(new LagBot());
+        this.modules.push(new SkinHack());
         const initInfoBoxInterval = setInterval(() => {
             if (this.canInjectInfoBox()) {
                 clearInterval(initInfoBoxInterval);
@@ -580,6 +595,14 @@ function patchAnticheat(script) {
     `);
 }
 
+function patchSkins(script) { 
+    script = applyPatch(script, 'patchSkins1', /_\.singlePlayer\?/, 'window.h4xskins?');
+    script = applyPatch(script, 'patchSkins2', /_\.singlePlayer\?/, 'window.h4xskins?');
+    script = applyPatch(script, 'patchSkins3', /x.skins=f/, 'x.skins=y&&window.h4xskins?[window.selectedSkin, -1]:f');
+    script = applyPatch(script, 'patchSkins4', /window.selectSkin=function\(t,e\){/, `window.selectSkin=function(t,e){window.selectedSkin=t;`);
+    return script;
+}
+
 function patchGameScript(script) {
     logger.log('Patching the game script...');
     script = patchControl(script);
@@ -591,6 +614,7 @@ function patchGameScript(script) {
     script = patchIsHacker(script);
     script = patchCamera(script);
     script = patchAnticheat(script);
+    script = patchSkins(script);
     logger.log('Successfully patched the game script!');
     return script;
 }
