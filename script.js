@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BEEP BOOP MOTHERFUCKER
 // @author       d-haxton
-// @version      10.1
+// @version      10.3
 // @include      /^(https?:\/\/)?(www\.)?(.+)krunker\.io(|\/|\/\?(server|party|game)=.+)$/
 // @grant        GM_xmlhttpRequest
 // @run-at       document-start
@@ -600,6 +600,7 @@ function patchSkins(script) {
     script = applyPatch(script, 'patchSkins2', /_\.singlePlayer\?/, 'window.h4xskins?');
     script = applyPatch(script, 'patchSkins3', /x.skins=f/, 'x.skins=y&&window.h4xskins?[window.selectedSkin, -1]:f');
     script = applyPatch(script, 'patchSkins4', /window.selectSkin=function\(t,e\){/, `window.selectSkin=function(t,e){window.selectedSkin=t;`);
+    script = applyPatch(script, 'patchSkins4', /_.store.skins\[t\],/, `_.store.skins[t],console.log(t);`);
     return script;
 }
 
