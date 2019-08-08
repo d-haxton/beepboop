@@ -5,6 +5,8 @@
 // @include      /^(https?:\/\/)?(www\.)?(.+)krunker\.io(|\/|\/\?(server|party|game)=.+)$/
 // @grant        GM_xmlhttpRequest
 // @run-at       document-start
+// @grant        GM_setValue
+// @grant        GM_getValue
 // ==/UserScript==
 
 //default keys
@@ -55,14 +57,44 @@ class Module {
 class SkinHack extends Module { 
     constructor() { 
         super(...arguments);
+        const cookie = GM_getValue("randomcookie", "-1");
+        if(cookie !== undefined)
+        {
+            unsafeWindow.selectedSkin = cookie;
+            console.log(unsafeWindow.selectedSkin);
+        }
+        
         unsafeWindow.h4xskins = true;
     }
 
     getName() { return 'All Skins'; };
     getKey() { return '' + keys.nine; }
     getAllModes() { return ["On", "Off"]; }
-    onTick() { 
+    onTick() {
         unsafeWindow.h4xskins = this.getCurrentMode() === "On";
+        if(unsafeWindow.shouldSave)
+        {
+            unsafeWindow.shouldSave = false;
+            GM_setValue("randomcookie", unsafeWindow.selectedSkin);
+        }
+    }
+
+    isEnabled() {
+        return this.getCurrentMode() === "On";
+    }
+}
+
+class NoSpawnTime extends Module {
+    constructor() { 
+        super(...arguments);
+        unsafeWindow.noSpawnTimer = false;
+    }
+
+    getName() { return 'No Spawn Timer'; };
+    getKey() { return '' + keys.six; }
+    getAllModes() { return ["Off", "On"]; }
+    onTick() {
+        unsafeWindow.noSpawnTimer = this.getCurrentMode() === "On";
     }
 }
 
@@ -368,6 +400,7 @@ class bigdickjesusland {
         this.modules.push(new AimWalls());
         this.modules.push(new AutoBHop());
         this.modules.push(new LagBot());
+        this.modules.push(new NoSpawnTime());
         this.modules.push(new SkinHack());
         const initInfoBoxInterval = setInterval(() => {
             if (this.canInjectInfoBox()) {
@@ -536,6 +569,10 @@ function patchOnTick(script) {
     });
 }
 
+function patchRespawn(script) { 
+    return applyPatch(script, 'patchRespawn', /i.deathDelay/, `0`)
+}
+
 function patchIsHacker(script) {
     // you're incompetent sid
     var x = applyPatch(script, 'patchIsHacker', /&&([a-zA-Z0-9_]+)\.isHacker&&/, `&& 1 === 0 &&`);
@@ -595,11 +632,11 @@ function patchAnticheat(script) {
     `);
 }
 
-function patchSkins(script) { 
+function patchSkins(script) {
     script = applyPatch(script, 'patchSkins1', /_\.singlePlayer\?/, 'window.h4xskins?');
     script = applyPatch(script, 'patchSkins2', /_\.singlePlayer\?/, 'window.h4xskins?');
     script = applyPatch(script, 'patchSkins3', /x.skins=f/, 'x.skins=y&&window.h4xskins?[window.selectedSkin, -1]:f');
-    script = applyPatch(script, 'patchSkins4', /window.selectSkin=function\(t,e\){/, `window.selectSkin=function(t,e){window.selectedSkin=t;`);
+    script = applyPatch(script, 'patchSkins4', /window.selectSkin=function\(t,e\){/, `window.selectSkin=function(t,e){window.selectedSkin=t;window.shouldSave=true;`);
     script = applyPatch(script, 'patchSkins4', /_.store.skins\[t\],/, `_.store.skins[t],console.log(t);`);
     return script;
 }
@@ -616,6 +653,7 @@ function patchGameScript(script) {
     script = patchCamera(script);
     script = patchAnticheat(script);
     script = patchSkins(script);
+    script = patchRespawn(script);
     logger.log('Successfully patched the game script!');
     return script;
 }
