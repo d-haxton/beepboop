@@ -645,6 +645,32 @@ function patchSkins(script) {
     return script;
 }
 
+function patchCanSee(script) { 
+    script = applyPatch(script, 'patchCanSee', /this.canSee=function\(t,e,n,i,a\){(.*)},this.updateAccounts=/, `this.canSee=function(t,e,n,i,a){
+        if (!t) return !1;
+        a = a || 0;
+        for (var o, c = r.getDistance3D(t.x, t.y, t.z, e, n, i), l = r.getDirection(t.z, t
+                    .x, i, e), p = r.getDirection(r.getDistance(t.x, t.z, e, i), n, 0, t.y)
+                , h = 1 / (c * Math.sin(l - Math.PI) * Math.cos(p)), u = 1 / (c * Math.cos(
+                    l -
+                    Math.PI) * Math.cos(p)), f = 1 / (c * Math.sin(p)), d = t.y + t.height -
+                s.cameraHeight, m = 0; m < this.map.manager.objects.length; ++m)
+            if (!(o = this.map.manager.objects[m])
+                .noShoot && o.active && !o.penetrable) {
+                var g = r.lineInRect(t.x, t.z, d, h, u, f, o.x - Math.max(0, o.width - a), o
+                    .z - Math.max(0, o.length - a), o.y - Math.max(0, o.height - a), o
+                    .x + Math.max(0, o.width - a), o.z + Math.max(0, o.length - a), o
+                    .y + Math.max(0, o.height - a));
+                if (g && 1 > g) return g
+            } var v = this.map.terrain;
+        if (v) {
+            var y = v.raycast(t.x, -t.z, d, 1 / h, -1 / u, 1 / f);
+            if (y) return r.getDistance3D(t.x, t.y, t.z, y.x, y.z, -y.y)
+        }
+        return null},this.updateAccounts=`);
+    return script;
+}
+
 function patchGameScript(script) {
     logger.log('Patching the game script...');
     script = patchControl(script);
@@ -659,6 +685,7 @@ function patchGameScript(script) {
     script = patchSkins(script);
     script = patchRespawn(script);
     script = patchBadHack(script);
+    script = patchCanSee(script);
     logger.log('Successfully patched the game script!');
     return script;
 }
