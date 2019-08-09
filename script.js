@@ -716,9 +716,12 @@ async function inlineRemoteScript(html, partialSrc) {
 
 
 (async () => {
-    window.stop();
     logger.log('Loading bigdickjesusland...');
-    let newHtml = await request(document.location.href);
+    let promise = request(document.location.href);
+    document.open();
+    document.write("");
+    document.close();
+    let newHtml = await promise;
     const gameScriptHash = /game\.([^\.]+)\.js/.exec(newHtml)[1];
     const gameScript = await request(`https://krunker.io/js/game.${gameScriptHash}.js`);
     newHtml = await inlineRemoteScript(newHtml, 'libs/zip.js');
